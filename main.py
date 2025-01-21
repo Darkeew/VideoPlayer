@@ -1,16 +1,17 @@
 import vlc
 import yt_dlp
 import os
-from pytubefix import Channel
+from pytubefix import Channel, Playlist # playlist is used for testing
 import json
 import random
+import time
 
 class VODs:
     def __init__(self):
         self.player = vlc.Instance()
         self.media_player = self.player.media_player_new()
         self.ydl_opts = {'outtmpl':'vods/queue/%(title)s.%(ext)s', 'format':"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best"}
-        self.url = "https://www.youtube.com/@Neuro-samaUnofficialVODs"
+        self.url = "https://www.youtube.com/@NArchiver"
         self.video_queue = None
 
     def get_playlist(self):
@@ -18,7 +19,7 @@ class VODs:
         with open("vods.json", "r+") as vj:
             vods_data = json.load(vj)
             #Get Playlist
-            playlist = Channel(self.url)
+            playlist = Playlist(self.url)
             vods_array = vods_data['vods']
             #Go through the playlist array and add unwatched videos & videos not added in the vod_data array (new videos)
             total_added = 0
@@ -66,6 +67,13 @@ class VODs:
                 self.set_vod()
                 # Play media
                 self.media_player.play()
+                time.sleep(0.1) # this prevents everything from breaking
+
+                #Remove media in watched folder, except currently playing media
+                for f in os.listdir("vods/watched"):
+                    try:
+                        os.remove(f"vods/watched/{f}")
+                    except: pass 
             elif self.video_queue == 0:
                 self.get_video()
 
