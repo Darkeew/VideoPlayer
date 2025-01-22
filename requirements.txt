@@ -2,3 +2,5 @@ python-vlc
 yt_dlp
 pytubefix
 discord
+python-dotenv
+audioop-lts

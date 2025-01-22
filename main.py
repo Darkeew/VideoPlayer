@@ -10,7 +10,7 @@ class VODs:
         self.player = vlc.Instance()
         self.media_player = self.player.media_player_new()
         self.ydl_opts = {'outtmpl':'vods/queue/%(title)s.%(ext)s', 'format':"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best"}
-        self.url = "https://www.youtube.com/@Neuro-samaUnofficialVODs"
+        self.url = "https://www.youtube.com/@NArchiver"
         self.video_queue = None
 
         with open("cfg.json", "r") as settings:
@@ -99,6 +99,6 @@ class VODs:
 
       
 vods = VODs()
-#vods.get_playlist()
+vods.get_playlist()
 vods.start_player()
 
