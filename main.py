@@ -13,6 +13,7 @@ class VODs:
         self.ydl_opts = {'outtmpl':'vods/queue/%(title)s.%(ext)s', 'format':"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best"}
         self.url = "https://www.youtube.com/@NArchiver"
         self.video_queue = None
+        self.url_array = []
 
         with open("cfg.json", "r") as settings:
             cfg = json.load(settings)
@@ -50,13 +51,7 @@ class VODs:
             data = {"vods": vods_array}
             vj.truncate()
             json.dump(data, vj)
-        
-        with open("cfg.json", "r+") as settings:
-            cfg = json.load(settings)
-            cfg["current_vod"]["url"] = url
-            settings.seek(0)
-            settings.truncate()
-            json.dump(cfg, settings)
+        self.url_array.append(url)
         return url
 
     def get_video(self):
@@ -66,10 +61,20 @@ class VODs:
             ydl.download([url])
 
     def set_vod(self):
-        video = os.listdir("vods/queue/")[0]
+        try:
+            video = os.listdir("vods/queue/")[0]
+        except:
+            self.get_video()
         with open("cfg.json", "r+") as settings:
             cfg = json.load(settings)
             cfg["current_vod"]["title"] = video
+            if len(self.url_array) == 0:
+                url = self.url_array[0]
+                self.url_array.remove(url)
+            else:
+                url = self.url_array[-1]
+                self.url_array.remove(url)
+            cfg["current_vod"]["url"] = url
             settings.seek(0)
             settings.truncate()
             json.dump(cfg, settings)
@@ -88,6 +93,10 @@ class VODs:
                     self.media_player.audio_set_volume(self.volume)
                 if cfg["skip"]:
                     self.set_vod()
+                    cfg["skip"] = False
+                    settings.seek(0)
+                    settings.truncate()
+                    json.dump(cfg, settings)
 
             self.video_queue = len(os.listdir("vods/queue/"))
             if self.media_player.is_playing() == 0 and self.video_queue != 0:
