@@ -1,0 +1,4 @@
+python-vlc
+yt_dlp
+pytubefix
+discord
