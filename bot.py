@@ -15,6 +15,10 @@ bot = commands.Bot(command_prefix=">", intents=discord.Intents.all())
 async def on_ready():
     print("online")
 
+@bot.command(brief="Sends the latency.") #honest steal, i cant bother to write a ping command https://stackoverflow.com/questions/46307035/latency-command-in-discord-py 
+async def ping(ctx):
+    await ctx.send('Pong! {0}'.format(round(bot.latency, 1)))
+
 @bot.command(brief="Shows the current volume set on the VLC Player.", aliases=["gv"])
 async def get_volume(ctx):
     # Shows the current volume
