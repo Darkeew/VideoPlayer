@@ -64,7 +64,6 @@ class VODs:
     def set_vod(self):
         try:
             video = os.listdir("vods/queue/")[0]
-            print("cool i managed it")
         except:
             self.get_video()
             video = os.listdir("vods/queue/")[0]
@@ -89,7 +88,6 @@ class VODs:
         os.replace(f"vods/queue/{video}", f"vods/watched/{video}")
 
         media = vlc.Media(f"vods/watched/{video}")
-        print(media)
         self.media_player.set_media(media)
 
     def start_player(self):
@@ -113,13 +111,13 @@ class VODs:
                     json.dump(cfg, settings)
             
             if self.skip:
-                self.media_player.set_position(0.999)
+                self.media_player.set_position(0.9999999999999)
                 self.skip = False
                 time.sleep(0.1)
                 
             if self.media_player.is_playing() == 0 and self.video_queue != 0:
-                print("im HERE")
                 self.set_vod()
+                time.sleep(0.1)
                 # Play media
                 self.media_player.play()
                 time.sleep(0.1) # this prevents everything from breaking
