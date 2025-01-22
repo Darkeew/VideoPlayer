@@ -26,7 +26,7 @@ class VODs:
         with open("vods.json", "r+") as vj:
             vods_data = json.load(vj)
             #Get Playlist
-            playlist = Playlist(self.url)
+            playlist = Channel(self.url)
             vods_array = vods_data['vods']
             #Go through the playlist array and add unwatched videos & videos not added in the vod_data array (new videos)
             total_added = 0
