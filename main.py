@@ -14,6 +14,7 @@ class VODs:
         self.url = "https://www.youtube.com/@NArchiver"
         self.video_queue = None
         self.url_array = []
+        self.skip = False
 
         with open("cfg.json", "r") as settings:
             cfg = json.load(settings)
@@ -63,14 +64,19 @@ class VODs:
     def set_vod(self):
         try:
             video = os.listdir("vods/queue/")[0]
+            print("cool i managed it")
         except:
             self.get_video()
+            video = os.listdir("vods/queue/")[0]
         with open("cfg.json", "r+") as settings:
             cfg = json.load(settings)
             cfg["current_vod"]["title"] = video
             if len(self.url_array) == 0:
-                url = self.url_array[0]
-                self.url_array.remove(url)
+                try:
+                    url = self.url_array[0]
+                    self.url_array.remove(url)
+                except:
+                    url = self.url
             else:
                 url = self.url_array[-1]
                 self.url_array.remove(url)
@@ -79,27 +85,40 @@ class VODs:
             settings.truncate()
             json.dump(cfg, settings)
 
+
         os.replace(f"vods/queue/{video}", f"vods/watched/{video}")
 
         media = vlc.Media(f"vods/watched/{video}")
+        print(media)
         self.media_player.set_media(media)
 
     def start_player(self):
         while True:
+            self.video_queue = len(os.listdir("vods/queue/"))
             with open("cfg.json", "r+") as settings:
-                cfg = json.load(settings)
+                settings.seek(0)
+                try:
+                    cfg = json.load(settings)
+                except:
+                    time.sleep(0.1)
+                    cfg = json.load(settings)
                 if self.volume != cfg["volume"]:
                     self.volume = cfg["volume"]
                     self.media_player.audio_set_volume(self.volume)
                 if cfg["skip"]:
-                    self.set_vod()
+                    self.skip = True
                     cfg["skip"] = False
                     settings.seek(0)
                     settings.truncate()
                     json.dump(cfg, settings)
-
-            self.video_queue = len(os.listdir("vods/queue/"))
+            
+            if self.skip:
+                self.media_player.set_position(0.999)
+                self.skip = False
+                time.sleep(0.1)
+                
             if self.media_player.is_playing() == 0 and self.video_queue != 0:
+                print("im HERE")
                 self.set_vod()
                 # Play media
                 self.media_player.play()
@@ -109,7 +128,9 @@ class VODs:
                 for f in os.listdir("vods/watched"):
                     try:
                         os.remove(f"vods/watched/{f}")
-                    except: pass 
+                        print(f"Removed {f}")
+                    except: pass
+                    
             elif self.video_queue == 0:
                 self.get_video()
 
