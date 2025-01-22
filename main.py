@@ -14,6 +14,11 @@ class VODs:
         self.url = "https://www.youtube.com/@NArchiver"
         self.video_queue = None
 
+        with open("cfg.json", "r") as settings:
+            cfg = json.load(settings)
+            self.volume = cfg["volume"]
+            self.skip = False
+
     def get_playlist(self):
         #Open JSON files
         with open("vods.json", "r+") as vj:
@@ -45,6 +50,13 @@ class VODs:
             data = {"vods": vods_array}
             vj.truncate()
             json.dump(data, vj)
+        
+        with open("cfg.json", "r+") as settings:
+            cfg = json.load(settings)
+            cfg["current_vod"]["url"] = url
+            settings.seek(0)
+            settings.truncate()
+            json.dump(cfg, settings)
         return url
 
     def get_video(self):
@@ -55,6 +67,13 @@ class VODs:
 
     def set_vod(self):
         video = os.listdir("vods/queue/")[0]
+        with open("cfg.json", "r+") as settings:
+            cfg = json.load(settings)
+            cfg["current_vod"]["title"] = video
+            settings.seek(0)
+            settings.truncate()
+            json.dump(cfg, settings)
+
         os.replace(f"vods/queue/{video}", f"vods/watched/{video}")
 
         media = vlc.Media(f"vods/watched/{video}")
@@ -62,6 +81,14 @@ class VODs:
 
     def start_player(self):
         while True:
+            with open("cfg.json", "r+") as settings:
+                cfg = json.load(settings)
+                if self.volume != cfg["volume"]:
+                    self.volume = cfg["volume"]
+                    self.media_player.audio_set_volume(self.volume)
+                if cfg["skip"]:
+                    self.set_vod()
+
             self.video_queue = len(os.listdir("vods/queue/"))
             if self.media_player.is_playing() == 0 and self.video_queue != 0:
                 self.set_vod()
